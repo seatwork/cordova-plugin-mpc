@@ -10,9 +10,9 @@ cordova plugin add https://github.com/seatwork/cordova-plugin-mpc
 
 ## Simple Usage
 
-Connect to MPD server with window.mpc: 
+Connect MPD server with window.mpc: 
 ```
-mpc.connect('10.0.0.1', 6600, res => {
+mpc.connect('10.0.0.2', 6600, res => {
   console.log('connect success')
 }, err => {
   console.error('connect failed: ', err)
