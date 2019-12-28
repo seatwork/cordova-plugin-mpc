@@ -58,6 +58,7 @@ public class MpcPlugin extends CordovaPlugin {
         switch (action) {
             case "connect": connect(args, callbackContext); break;
             case "command": command(args, callbackContext); break;
+            case "disconnect": disconnect(args, callbackContext); break;
             default: callbackContext.error("Undefined method:" + action);
             return false;
         }
@@ -73,9 +74,8 @@ public class MpcPlugin extends CordovaPlugin {
         int port = args.getInt(1);
 
         try {
-            if (!isSocketAlive()) {
-                socket = new Socket(host, port);
-            }
+            if (!isSocketAlive() || serverChanged(host, port))
+            socket = new Socket(host, port);
             callbackContext.success();
         } catch (Exception e) {
             callbackContext.error(e.getMessage());
@@ -119,18 +119,45 @@ public class MpcPlugin extends CordovaPlugin {
         return buffer.toString();
     }
 
+
     /**
-     * Assert message end by read line.
+     * Disconnect MPD server
+     */
+    private void disconnect(CordovaArgs args, CallbackContext callbackContext)
+        throws JSONException  {
+        try {
+            if (socket != null) {
+                socket.close();
+                socket = null;
+            }
+            callbackContext.success();
+        } catch (Exception e) {
+            callbackContext.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Check message end by read line.
      */
     private boolean isMessageEnd(String line) {
         return line == null || MPD_OK.equals(line);
     }
 
     /**
+     * Check server changed
+     */
+    private boolean serverChanged(String host, int port) {
+        String inetAddress = socket.getInetAddress().getHostAddress();
+        int inetPort = socket.getPort();
+        return inetPort != port || !inetAddress.equals(host);
+    }
+
+    /**
      * Check the real state of socket by urgent package
      */
     private boolean isSocketAlive() {
-        if (socket == null || !socket.isConnected() || !socket.isBound()) {
+        if (socket == null || socket.isClosed() ||
+            !socket.isConnected() || !socket.isBound()) {
             return false;
         }
         try {

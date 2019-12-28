@@ -5,6 +5,10 @@ module.exports = {
     exec(success, error, 'MpcPlugin', 'connect', [ host, port ])
   },
 
+  disconnect(success, error) {
+    exec(success, error, 'MpcPlugin', 'disconnect', [])
+  },
+
   command(arg, success, error) {
     exec(success, error, 'MpcPlugin', 'command', [ arg ])
   }
