@@ -26,6 +26,15 @@ mpc.command('send message', res => {
 })
 ```
 
+Disconnect MPD server:
+```
+mpc.disconnect(res => {
+  console.log('disconnect success')
+}, err => {
+  console.error('disconnect failed: ', err)
+})
+```
+
 ## MPD Commands
 
 ["add","addid","addtagid","channels","clear","clearerror","cleartagid","close","commands","config","consume","count","crossfade","currentsong","decoders","delete","deleteid","disableoutput","enableoutput","find","findadd","idle","kill","list","listall","listallinfo","listfiles","listmounts","listplaylist","listplaylistinfo","listplaylists","load","lsinfo","mixrampdb","mixrampdelay","mount","move","moveid","next","notcommands","outputs","password","pause","ping","play","playid","playlist","playlistadd","playlistclear","playlistdelete","playlistfind","playlistid","playlistinfo","playlistmove","playlistsearch","plchanges","plchangesposid","previous","prio","prioid","random","rangeid","readcomments","readmessages","rename","repeat","replay_gain_mode","replay_gain_status","rescan","rm","save","search","searchadd","searchaddpl","seek","seekcur","seekid","sendmessage","setvol","shuffle","single","stats","status","stop","subscribe","swap","swapid","tagtypes","toggleoutput","unmount","unsubscribe","update","urlhandlers","volume"]
