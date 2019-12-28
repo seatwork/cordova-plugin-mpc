@@ -46,7 +46,7 @@ public class MpcPlugin extends CordovaPlugin {
     private static final String MPD_ERROR = "ACK";
 
     // TCP socket
-    private static final Socket socket = new Socket();
+    private Socket socket;
 
     /**
      * Plugin main method
@@ -73,8 +73,9 @@ public class MpcPlugin extends CordovaPlugin {
         int port = args.getInt(1);
 
         try {
-            if (!socket.isConnected())
-            socket.connect(new InetSocketAddress(host, port));
+            if (!isSocketAlive()) {
+                socket = new Socket(host, port);
+            }
             callbackContext.success();
         } catch (Exception e) {
             callbackContext.error(e.getMessage());
@@ -123,6 +124,21 @@ public class MpcPlugin extends CordovaPlugin {
      */
     private boolean isMessageEnd(String line) {
         return line == null || MPD_OK.equals(line);
+    }
+
+    /**
+     * Check the real state of socket by urgent package
+     */
+    private boolean isSocketAlive() {
+        if (socket == null || !socket.isConnected() || !socket.isBound()) {
+            return false;
+        }
+        try {
+            socket.sendUrgentData(0xFF);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
