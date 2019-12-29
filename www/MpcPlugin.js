@@ -11,6 +11,10 @@ module.exports = {
 
   command(arg, success, error) {
     exec(success, error, 'MpcPlugin', 'command', [ arg ])
+  },
+
+  moveToBackground(success, error) {
+    exec(success, error, 'MpcPlugin', 'moveToBackground', [])
   }
 
 }

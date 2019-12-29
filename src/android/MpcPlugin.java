@@ -23,6 +23,8 @@
 
 package net.cloudseat.cordova;
 
+import android.content.Intent;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -52,14 +54,15 @@ public class MpcPlugin extends CordovaPlugin {
      * Plugin main method
      */
     @Override
-    public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext)
+    public boolean execute(String action, CordovaArgs args, CallbackContext callback)
         throws JSONException {
 
         switch (action) {
-            case "connect": connect(args, callbackContext); break;
-            case "command": command(args, callbackContext); break;
-            case "disconnect": disconnect(args, callbackContext); break;
-            default: callbackContext.error("Undefined method:" + action);
+            case "connect": connect(args, callback); break;
+            case "command": command(args, callback); break;
+            case "disconnect": disconnect(callback); break;
+            case "moveToBackground": moveToBackground(callback); break;
+            default: callback.error("Undefined method:" + action);
             return false;
         }
         return true;
@@ -68,7 +71,7 @@ public class MpcPlugin extends CordovaPlugin {
     /**
      * Connect MPD server with host and port.
      */
-    private void connect(CordovaArgs args, CallbackContext callbackContext)
+    private void connect(CordovaArgs args, CallbackContext callback)
         throws JSONException  {
         String host = args.getString(0);
         int port = args.getInt(1);
@@ -76,9 +79,9 @@ public class MpcPlugin extends CordovaPlugin {
         try {
             if (!isSocketAlive() || serverChanged(host, port))
             socket = new Socket(host, port);
-            callbackContext.success();
+            callback.success();
         } catch (Exception e) {
-            callbackContext.error(e.getMessage());
+            callback.error(e.getMessage());
         }
     }
 
@@ -86,16 +89,41 @@ public class MpcPlugin extends CordovaPlugin {
      * Write command to MPD server.
      * @link https://www.musicpd.org
      */
-    private void command(CordovaArgs args, CallbackContext callbackContext)
+    private void command(CordovaArgs args, CallbackContext callback)
         throws JSONException  {
         String command = args.getString(0) + "\n";
 
         try {
             socket.getOutputStream().write(command.getBytes("UTF-8"));
-            callbackContext.success(receiveMessage());
+            callback.success(receiveMessage());
         } catch (Exception e) {
-            callbackContext.error(e.getMessage());
+            callback.error(e.getMessage());
         }
+    }
+
+    /**
+     * Disconnect MPD server
+     */
+    private void disconnect(CallbackContext callback)  {
+        try {
+            if (socket != null) {
+                socket.close();
+                socket = null;
+            }
+            callback.success();
+        } catch (Exception e) {
+            callback.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Moves the app to the background.
+     */
+    private void moveToBackground(CallbackContext callback) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        cordova.getActivity().startActivity(intent);
+        callback.success();
     }
 
     /**
@@ -117,23 +145,6 @@ public class MpcPlugin extends CordovaPlugin {
             }
         }
         return buffer.toString();
-    }
-
-
-    /**
-     * Disconnect MPD server
-     */
-    private void disconnect(CordovaArgs args, CallbackContext callbackContext)
-        throws JSONException  {
-        try {
-            if (socket != null) {
-                socket.close();
-                socket = null;
-            }
-            callbackContext.success();
-        } catch (Exception e) {
-            callbackContext.error(e.getMessage());
-        }
     }
 
     /**
